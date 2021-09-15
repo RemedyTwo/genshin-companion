@@ -15,8 +15,8 @@ class Character:
     def __init__(self, name: str) -> None:
         self.name = name
     
-    def get_image_path(self) -> str:
-        return "E:\\sbilal\\Code\\genshin-overlay\\img\\" + self.name + ".png"
+    def get_gacha_card_image(self) -> Image:
+        return Image.open("E:\\sbilal\\Code\\genshin-overlay\\img\\" + self.name + ".png")
 
 # Launch-related functions
 def is_game_open() -> bool:
