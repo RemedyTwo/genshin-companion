@@ -1,8 +1,9 @@
+from functions import *
 from genshin import *
 from user_interface import Ui_MainWindow
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPixmap
-from PIL import ImageQt
+from PIL import ImageEnhance, ImageQt
 
 #tutorial: https://youtu.be/XXPNpdaK9WA
 # 320, 1024
@@ -14,6 +15,7 @@ class Window(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.updateParty.clicked.connect(self.updateParty)
+        self.ui.updateCurrentCharacter.clicked.connect(self.updateCurrentCharacter)
     
     def updateParty(self):
         party = get_party_members_from_name()
@@ -21,6 +23,38 @@ class Window(QtWidgets.QMainWindow):
         self.ui.character2.setPixmap(ImageQt.toqpixmap(party[1].get_gacha_card_image()))
         self.ui.character3.setPixmap(ImageQt.toqpixmap(party[2].get_gacha_card_image()))
         self.ui.character4.setPixmap(ImageQt.toqpixmap(party[3].get_gacha_card_image()))
+    
+    def updateCurrentCharacter(self):
+        current_character = get_current_character()
+        factor = 0.5
+        if current_character == 1:
+            image = darken_pixmap(self.ui.character2.pixmap(), factor)
+            self.ui.character2.setPixmap(image)
+            image = darken_pixmap(self.ui.character3.pixmap(), factor)
+            self.ui.character3.setPixmap(image)
+            image = darken_pixmap(self.ui.character4.pixmap(), factor)
+            self.ui.character4.setPixmap(image)
+        elif current_character == 2:
+            image = darken_pixmap(self.ui.character1.pixmap(), factor)
+            self.ui.character1.setPixmap(image)
+            image = darken_pixmap(self.ui.character3.pixmap(), factor)
+            self.ui.character3.setPixmap(image)
+            image = darken_pixmap(self.ui.character4.pixmap(), factor)
+            self.ui.character4.setPixmap(image)
+        elif current_character == 3:
+            image = darken_pixmap(self.ui.character1.pixmap(), factor)
+            self.ui.character1.setPixmap(image)
+            image = darken_pixmap(self.ui.character2.pixmap(), factor)
+            self.ui.character2.setPixmap(image)
+            image = darken_pixmap(self.ui.character4.pixmap(), factor)
+            self.ui.character4.setPixmap(image)
+        elif current_character == 4:
+            image = darken_pixmap(self.ui.character1.pixmap(), factor)
+            self.ui.character1.setPixmap(image)
+            image = darken_pixmap(self.ui.character2.pixmap(), factor)
+            self.ui.character2.setPixmap(image)
+            image = darken_pixmap(self.ui.character3.pixmap(), factor)
+            self.ui.character3.setPixmap(image)
 
 if __name__ == "__main__":
     import sys

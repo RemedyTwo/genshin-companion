@@ -1,5 +1,5 @@
 from functions import *
-from PIL import Image
+from PIL import Image, ImageEnhance
 import difflib, logging, psutil, pytesseract, subprocess, time, win32gui, win32process
     
 GENSHIN_ACTIVE = None
@@ -108,6 +108,7 @@ def get_current_character() -> int:
             amount += 1
     if amount > 1:
         return 0
+    logging.info("Current character: " + str(current + 1))
     return current + 1
 
 def get_character_from_name(image: Image) -> str:

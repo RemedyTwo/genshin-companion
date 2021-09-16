@@ -1,7 +1,19 @@
-from PIL import Image, ImageGrab
-import ctypes, cv2, logging, numpy, pytesseract, re, sys, win32api
+from PIL import Image, ImageEnhance, ImageGrab, ImageQt
+from PyQt5.QtCore import QBuffer, QIODevice, QPoint
+from PyQt5.QtGui import QImage, QPixmap, qRgb
+import ctypes, cv2, io, logging, numpy, pytesseract, re, sys, win32api
 
-# Genshin-general functions
+def darken_pixmap(pixmap: QPixmap, factor: float) -> Image:
+    image = pixmap.toImage()
+    for h in range(0, image.height()):
+        for w in range(0, image.width()):
+            color = image.pixelColor(w, h)
+            if (image.pixel(w, h) != 0):
+                color.setRgb(color.red() * factor, color.blue() * factor, color.green() * factor, color.alpha())
+                image.setPixelColor(w, h, color)
+
+    return QPixmap.fromImage(image)
+
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -36,8 +48,3 @@ def launch_as_admin() -> None:
     if not is_admin():
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
         exit(0)
-
-# UI-related functions
-def updateCharacters():
-    print(3)
-    pass
