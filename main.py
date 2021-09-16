@@ -1,9 +1,10 @@
 from functions import *
 from genshin import *
 from user_interface import Ui_MainWindow
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QPixmap
-from PIL import ImageEnhance, ImageQt
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPainter, QPen
+from PIL import ImageQt
 
 #tutorial: https://youtu.be/XXPNpdaK9WA
 # 320, 1024
@@ -28,12 +29,11 @@ class Window(QtWidgets.QMainWindow):
         current_character = get_current_character()
         factor = 0.5
         if current_character == 1:
-            image = darken_pixmap(self.ui.character2.pixmap(), factor)
-            self.ui.character2.setPixmap(image)
-            image = darken_pixmap(self.ui.character3.pixmap(), factor)
-            self.ui.character3.setPixmap(image)
-            image = darken_pixmap(self.ui.character4.pixmap(), factor)
-            self.ui.character4.setPixmap(image)
+            painter = QPainter(self)
+            painter.drawPixmap(self.rect(), self.ui.character1.pixmap())
+            pen = QPen(Qt.red, 3)
+            painter.setPen(pen)
+            painter.drawLine(10, 10, self.rect().width() -10 , 10)
         elif current_character == 2:
             image = darken_pixmap(self.ui.character1.pixmap(), factor)
             self.ui.character1.setPixmap(image)
