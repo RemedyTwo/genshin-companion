@@ -28,7 +28,7 @@
            <height>511</height>
           </rect>
          </property>
-         <layout class="QGridLayout" name="gridLayout_2">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="1">
            <widget class="QLabel" name="character2">
             <property name="text">
@@ -77,13 +77,6 @@
           </item>
          </layout>
         </widget>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="updateCurrentCharacter">
-        <property name="text">
-         <string>Update current character</string>
-        </property>
        </widget>
       </item>
       <item>

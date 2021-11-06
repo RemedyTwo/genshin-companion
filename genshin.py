@@ -1,9 +1,11 @@
 from functions import *
+from io import BytesIO
 from PIL import Image, ImageEnhance
-import difflib, logging, psutil, pytesseract, subprocess, time, win32gui, win32process
-    
+import csv, difflib, logging, psutil, pytesseract, requests, subprocess, time, win32gui, win32process
+
 GENSHIN_ACTIVE = None
 
+# Logging
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
@@ -13,10 +15,22 @@ pytesseract.pytesseract.tesseract_cmd = "E:\\sbilal\\Logiciels\\Tesseract-OCR\\t
 
 class Character:
     def __init__(self, name: str) -> None:
-        self.name = name
-    
+        data = self.get_character_info(name)
+        self.name = data[0]
+        self.element = data[1]
+        self.codename = data[2]
+
+    def get_character_info(self, character_name: str):
+        db = csv.reader(open('db\\character_list.csv'))
+        for row in db:
+            if row[0] == character_name:
+                return row
+        
     def get_gacha_card_image(self) -> Image:
         return Image.open("E:\\sbilal\\Code\\genshin-overlay\\img\\" + self.name + ".png")
+    
+    def get_gacha_card_image_url(self) -> str:
+        return "https://genshin.honeyhunterworld.com/img/char/" + self.codename + "_gacha_card.png"
 
 # Launch-related functions
 def is_game_open() -> bool:
@@ -90,10 +104,11 @@ def is_skill_used() -> bool:
     return False
 
 def get_character_list() -> list:
-    with open("db/character_list.txt") as file:
-        lines = file.readlines()
-        lines = [line.rstrip() for line in lines]
-    return lines
+    list = []
+    db = csv.reader(open('db\\character_list.csv'))
+    for row in db:
+        list.append(row[0])
+    return list
 
 def get_current_character() -> int:
     character1 = get_genshin_screenshot(1882, 300, 1883, 301)
@@ -126,10 +141,11 @@ def get_party_members_from_name() -> list:
     party = []
     x1, y1, x2, y2 = 1620, 260, 1765, 305
     for i in range (0, 4):
-        character = Character(None)
-        while(character.name == None or 4 > len(character.name)):
+        character_name = None
+        while(character_name == None or 4 > len(character_name)):
             screenshot = get_genshin_screenshot(x1, y1, x2, y2)
-            character = Character(get_character_from_name(screenshot))
+            character_name = get_character_from_name(screenshot)
+        character = Character(character_name)
         party.append(character)
         y1 += 100
         y2 += 100

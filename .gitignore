@@ -1,5 +1,4 @@
 __pycache__
-db/character_list.csv
 img/*
 !img/.gitkeep
 test.py
