@@ -2,3 +2,4 @@ __pycache__
 img/*
 !img/.gitkeep
 test.py
+.vscode/

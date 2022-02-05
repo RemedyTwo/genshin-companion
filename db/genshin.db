@@ -1,0 +1,93 @@
+DROP TABLE IF EXISTS characters;
+
+CREATE TABLE characters 
+(
+    en_name TEXT NOT NULL,
+    fr_name TEXT,
+    rarity INTEGER NOT NULL,
+    weapon TEXT NOT NULL, 
+    vision TEXT NOT NULL, 
+    skill_name TEXT NOT NULL UNIQUE, 
+    burst_name TEXT NOT NULL UNIQUE,
+
+    CHECK (rarity = 4 OR rarity = 5),
+    CHECK (weapon in ('Sword', 'Claymore', 'Polearm', 'Catalyst', 'Bow')),
+    CHECK (vision in ('Pyro', 'Hydro', 'Electro', 'Anemo', 'Cryo', 'Geo')),
+
+    PRIMARY KEY (en_name, vision)
+);
+
+INSERT INTO characters VALUES 
+('Shenhe', NULL, 5, 'Polearm', 'Cryo', 'Spring Spirit Summoning', 'Divine Maiden''s Deliverance'),
+('Yun Jin', NULL, 4, 'Polearm', 'Geo', 'Opening Flourish', 'Cliffbreaker''s Banner'),
+('Arataki Itto', NULL, 5, 'Claymore', 'Geo', 'Masatsu Zetsugi: Akaushi Burst!', 'Royal Descent: Behold, Itto the Evil!'),
+('Gorou', NULL, 4, 'Bow', 'Geo', 'Inuzaka All-Round Defense', 'Juuga: Forward Unto Victory'),
+('Thoma', 'Thomas', 4, 'Polearm', 'Pyro', 'Blazing Blessing', 'Crimson Ooyoroi'),
+('Sangonomiya Kokomi', NULL, 5, 'Catalyst', 'Hydro', 'Kurage''s Oath', 'Nereid''s Ascension'),
+('Raiden Shogun', 'Shogun Raiden', 5, 'Polearm', 'Electro', 'Transcendence: Baleful Omen', 'Secret Art: Musou Shinsetsu'),
+('Kujou Sara', NULL, 4, 'Bow', 'Electro', 'Tengu Stormcall', 'Subjugation: Koukou Sendou'),
+('Aloy', NULL, 5, 'Bow', 'Cryo', 'Frozen Wilds', 'Prophecies of Dawn'),
+('Yoimiya', NULL, 5, 'Bow', 'Pyro', 'Niwabi Fire-Dance', 'Ryuukin Saxifrage'),
+('Sayu', NULL, 4, 'Claymore', 'Anemo', 'Yoohoo Art: Fuuin Dash', 'Yoohoo Art: Mujina Flurry'),
+('Kamisato Ayaka', NULL, 5, 'Sword', 'Cryo', 'Kamisato Art: Hyouka', 'Kamisato Art: Soumetsu'),
+('Kaedehara Kazuha', NULL, 5, 'Sword', 'Anemo', 'Chihayaburu', 'Kazuha Slash'),
+('Eula', NULL, 5, 'Claymore', 'Cryo', 'Icetide Vortex', 'Glacial Illumination'),
+('Yanfei', NULL, 4, 'Catalyst', 'Pyro', 'Signed Edict', 'Done Deal'),
+('Rosaria', 'Rosalia', 4, 'Polearm', 'Cryo', 'Ravaging Confession', 'Rites of Termination'),
+('Hu Tao', NULL, 5, 'Polearm', 'Pyro', 'Guide to Afterlife', 'Spirit Soother'),
+('Xiao', NULL, 5, 'Polearm', 'Anemo', 'Lemniscatic Wind Cycling', 'Bane of All Evil'),
+('Ganyu', NULL, 5, 'Bow', 'Cryo', 'Trail of the Qilin', 'Celestial Shower'),
+('Albedo', NULL, 5, 'Sword', 'Geo', 'Abiogenesis: Solar Isotoma', 'Rite of Progeniture: Tectonic Tide'),
+('Zhongli', NULL, 5, 'Polearm', 'Geo', 'Dominus Lapidis', 'Planet Befall'),
+('Xinyan', NULL, 4, 'Claymore', 'Pyro', 'Sweeping Fervor', 'Riff Revolution'),
+('Tartaglia', NULL, 5, 'Bow', 'Hydro', 'Foul Legacy: Raging Tide', 'Havoc: Obliteration'),
+('Diona', NULL, 4, 'Bow', 'Cryo', 'Icy Paws', 'Signature Mix'),
+('Klee', NULL, 5, 'Catalyst', 'Pyro', 'Jumpy Dumpty', 'Sparks ''n'' Splash'),
+('Venti', NULL, 5, 'Bow', 'Anemo', 'Skyward Sonnet', 'Wind''s Grand Ode'),
+('Keqing', NULL, 5, 'Sword', 'Electro', 'Stellar Restoration', 'Starward Sword'),
+('Mona', NULL, 5, 'Catalyst', 'Hydro', 'Mirror Reflection of Doom', 'Stellaris Phantasm'),
+('Qiqi', NULL, 5, 'Sword', 'Cryo', 'Adeptus Art: Herald of Frost','Adeptus Art: Preserver of Fortune'),
+('Diluc', NULL, 5, 'Claymore', 'Pyro', 'Searing Onslaught', 'Dawn'),
+('Jean', NULL, 5, 'Sword', 'Anemo', 'Gale Blade', 'Dandelion Breeze'),
+('Sucrose', NULL, 4, 'Catalyst', 'Anemo', 'Astable Anemohypostasis Creation - 6308', 'Forbidden Creation - Isomer 7NULL, 5 / Type II'),
+('Chongyun', NULL, 4, 'Claymore', 'Cryo', 'Spirit Blade: Chonghua''s Layered Frost', 'Spirit Blade: Cloud-Parting Star'),
+('Noelle', 'Noëlle', 4, 'Claymore', 'Geo', 'Breastplate', 'Sweeping Time'),
+('Bennett', NULL, 4, 'Sword', 'Pyro', 'Passion Overload', 'Fantastic Voyage'),
+('Fischl', NULL, 4, 'Bow', 'Electro', 'Nightrider', 'Midnight Phantasmagoria'),
+('Ningguang', NULL, 4, 'Catalyst', 'Geo', 'Jade Screen', 'Starshatter'),
+('Xingqiu', NULL, 4, 'Sword', 'Hydro', 'Guhua Sword: Fatal Rainscreen', 'Guhua Sword: Raincutter'),
+('Beidou', NULL, 4, 'Claymore', 'Electro', 'Tidecaller', 'Stormbreaker'),
+('Xiangling', NULL, 4, 'Polearm', 'Pyro', 'Guoba Attack', 'Pyronado'),
+('Razor', NULL, 4, 'Claymore', 'Electro', 'Claw and Thunder', 'Lightning Fang'),
+('Barbara', NULL, 4, 'Catalyst', 'Hydro', 'Let the Show Begin♪', 'Shining Miracle♪'),
+('Lisa', NULL, 4, 'Catalyst', 'Electro', 'Violet Arc', 'Lightning Rose'),
+('Kaeya', NULL, 4, 'Sword', 'Cryo', 'Frostgnaw', 'Glacial Waltz'),
+('Amber', NULL, 4, 'Bow', 'Pyro', 'Explosive Puppet', 'Fiery Rain'),
+('Traveler', 'Voyageur', 5, 'Sword', 'Electro', 'Lightning Blade', 'Bellowing Thunder'),
+('Traveler', 'Voyageur', 5, 'Sword', 'Geo', 'Starfell Sword', 'Starfell Sword'),
+('Traveler', 'Voyageur', 5, 'Sword', 'Anemo', 'Palm Vortex', 'Gust Surge');
+
+CREATE TABLE skill 
+(
+    en_name TEXT NOT NULL,
+    vision TEXT NOT NULL,
+    hold BOOLEAN NOT NULL,
+    cooldown INTEGER NOT NULL,
+    hold_cooldown INTEGER,
+
+    CHECK (vision in ('Pyro', 'Hydro', 'Electro', 'Anemo', 'Cryo', 'Geo')),
+
+    PRIMARY KEY (en_name)
+);
+
+CREATE TABLE talents 
+(
+    en_name TEXT NOT NULL,
+    vision TEXT NOT NULL,
+    cooldown INTEGER NOT NULL,
+    energy INTEGER NOT NULL,
+
+    CHECK (vision in ('Pyro', 'Hydro', 'Electro', 'Anemo', 'Cryo', 'Geo')),
+
+    PRIMARY KEY (en_name)
+);
