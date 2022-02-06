@@ -1,5 +1,6 @@
+from xml.dom.minidom import Attr
 from PIL import ImageEnhance, ImageQt
-import genshin, logging, pynput, PyQt5, PyQt5.QtCore, time, gui.user_interface, sys
+import functions, genshin, logging, pynput, PyQt5, PyQt5.QtCore, time, gui.user_interface, sys
 
 class GameState(PyQt5.QtCore.QThread):
     game_active = PyQt5.QtCore.pyqtSignal()
@@ -17,7 +18,7 @@ class GameState(PyQt5.QtCore.QThread):
                 if genshin.is_game_active():
                     self.game_active.emit()
                     self.state = True
-                time.sleep(5)
+                time.sleep(10)
 
 class Game(PyQt5.QtCore.QThread):
     gameplay = PyQt5.QtCore.pyqtSignal()
@@ -43,53 +44,86 @@ class Game(PyQt5.QtCore.QThread):
                 self.last_state = self.stats_page2
             else:
                 self.burst.emit()
-            time.sleep(2)
+            time.sleep(10)
         
-class GameEvent(PyQt5.QtCore.QThread):
+class CharacterSwitch(PyQt5.QtCore.QThread):
     current_character = PyQt5.QtCore.pyqtSignal(int)
     last_current_character = 0
-    health_points = PyQt5.QtCore.pyqtSignal(int, int)
-    health = [(0, 0), (0, 0), (0, 0), (0, 0)]
-    skill_cooldown = PyQt5.QtCore.pyqtSignal(float)
-    burst_cooldown = PyQt5.QtCore.pyqtSignal(float)
 
     def run(self) -> None:
-        while not self.isInterruptionRequested():
+        self.listener = pynput.keyboard.Listener(on_press=self.on_press)
+        self.listener.start()
+        self.listener.join()
+    
+    def requestInterruption(self) -> None:
+        self.listener.stop()
+        return super().requestInterruption()
+
+    def on_press(self, key) -> None:
+        try:
+            button_pressed = key.char
+        except AttributeError:
+            return
+        if button_pressed == '&' or button_pressed == 'é' or button_pressed == '"' or button_pressed == "'":
+            time.sleep(0.1)
             current_character = genshin.get_current_character()
             if not current_character == 0 and not current_character == self.last_current_character:
                 self.current_character.emit(current_character)
                 self.last_current_character = current_character
 
+class Health(PyQt5.QtCore.QThread):
+    health_points = PyQt5.QtCore.pyqtSignal(int, int)
+
+    def run(self) -> None:
+        while not self.isInterruptionRequested():
             health = genshin.get_health_points()
-            if not health == (0, 0) and not self.last_current_character == 0 and not self.health[self.last_current_character - 1] == health:
+            if not health == (0, 0):
                 self.health_points.emit(health[0], health[1])
-                self.health[self.last_current_character - 1] = health
-                
+            time.sleep(2)
+    
+class Skill(PyQt5.QtCore.QThread):
+    skill_cooldown = PyQt5.QtCore.pyqtSignal(float)
+
+    def run(self) -> None:
+        self.listener = pynput.keyboard.Listener(on_press=self.on_press)
+        self.listener.start()
+        self.listener.join()
+    
+    def requestInterruption(self) -> None:
+        self.listener.stop()
+        return super().requestInterruption()
+
+    def on_press(self, key) -> None:
+        try:
+            button_pressed = key.char
+        except AttributeError:
+            return
+        if button_pressed == 'E' or button_pressed == 'e':
             skill_cooldown = genshin.get_skill_cd()
             if not skill_cooldown == 0.0:
                 self.skill_cooldown.emit(skill_cooldown)
-                
-            time.sleep(0.5)
 
-    # def run(self) -> None:
-    #     def on_press(key) -> None:
-    #         if self.isInterruptionRequested():
-    #             return
-    #         try:
-    #             if key.char == 'E' or key.char == 'e':
-    #                 time.sleep(1.0)
-    #                 cd = genshin.get_skill_cd()
-    #                 self.skill_cooldown.emit(cd)
-    #             if key.char == 'A' or key.char == 'a':
-    #                 print("burst")
-    #             if key.char == '&' or key.char == 'é' or key.char == '"' or key.char == "'":
-    #                 time.sleep(1.0)
-    #                 current_character = genshin.get_current_character()
-    #                 self.current_character.emit(current_character)
-    #         except AttributeError: pass
-    #     listener = pynput.keyboard.Listener(on_press=on_press)
-    #     listener.start()
-    #     listener.join()
+class Burst(PyQt5.QtCore.QThread):
+    burst_cooldown = PyQt5.QtCore.pyqtSignal(float)
+
+    def run(self) -> None:
+        self.listener = pynput.keyboard.Listener(on_press=self.on_press)
+        self.listener.start()
+        self.listener.join()
+    
+    def requestInterruption(self) -> None:
+        self.listener.stop()
+        return super().requestInterruption()
+
+    def on_press(self, key) -> None:
+        try:
+            button_pressed = key.char
+        except AttributeError:
+            return
+        if button_pressed == 'A' or button_pressed == 'a':
+            burst_cooldown = genshin.get_skill_cd()
+            if not burst_cooldown == 0.0:
+                self.burst_cooldown.emit(burst_cooldown)
 
 class Timer(PyQt5.QtCore.QThread):
     def __init__(self, field, cooldown: float) -> None:
@@ -127,7 +161,8 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.game_state.game_inactive.connect(self.game_now_inactive)
 
         # Other threads
-        self.cd_threads = {}    
+        self.skill_cd_threads = {}
+        self.burst_cd_threads = {}
 
     def game_now_active(self) -> None:
         self.game = Game()
@@ -136,22 +171,39 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         self.game.start()
 
     def game_now_inactive(self) -> None:
-        self.game_event.requestInterruption()
+        self.health_thread.requestInterruption()
+        self.skill_thread.requestInterruption()
+        self.burst_thread.requestInterruption()
         self.game.requestInterruption()
-        for _, thread in self.cd_threads.items():
-            thread.requestInterruption()
+        for _, skill_cd_thread, _, burst_cd_thread in zip(self.skill_cd_threads.items(), self.burst_cd_threads.items()):
+            skill_cd_thread.requestInterruption()
+            burst_cd_thread.requestInterruption()
 
     def now_in_gameplay(self) -> None:
-        self.game_event = GameEvent()
-        self.game_event.start()
-        self.game_event.current_character.connect(self.update_current_character)
-        self.game_event.health_points.connect(self.update_health)
-        self.game_event.skill_cooldown.connect(self.update_skill_cd)
+        self.character_switch_thread = CharacterSwitch()
+        self.character_switch_thread.current_character.connect(self.update_current_character)
+
+        self.health_thread = Health()
+        self.health_thread.health_points.connect(self.update_health)
+
+        self.skill_thread = Skill()
+        self.skill_thread.skill_cooldown.connect(self.update_skill_cd)
+
+        self.burst_thread = Burst()
+        self.burst_thread.burst_cooldown.connect(self.update_burst_cd)
+
+        self.character_switch_thread.start()
+        self.health_thread.start()
+        self.skill_thread.start()
+        self.burst_thread.start()
+
         self.update_party()
         logging.info("Currently in gameplay.")
     
     def now_in_character_menu(self) -> None:
-        self.game_event.requestInterruption()
+        self.health_thread.requestInterruption()
+        self.skill_thread.requestInterruption()
+        self.burst_thread.requestInterruption()
         name = genshin.get_character_page_name().name
         logging.info("Currently in " + name + " character menu")
 
@@ -159,11 +211,11 @@ class Window(PyQt5.QtWidgets.QMainWindow):
         darken_factor = 0.5
         icon_size = 64
 
-        party = genshin.get_party_members()
+        self.party = genshin.get_party_members()
         for i in range(0, 4):
-            character_art = party.get(i + 1).get_gacha_card_image()
-            skill_art = ImageQt.toqpixmap(party.get(i + 1).get_skill_icon()).scaledToWidth(icon_size)
-            burst_art = ImageQt.toqpixmap(party.get(i + 1).get_burst_icon()).scaledToWidth(icon_size)
+            character_art = self.party.get(i + 1).get_multiwish_art()
+            skill_art = ImageQt.toqpixmap(self.party.get(i + 1).get_skill_icon()).scaledToWidth(icon_size)
+            burst_art = ImageQt.toqpixmap(self.party.get(i + 1).get_burst_icon()).scaledToWidth(icon_size)
             if not i + 1 == self.current_character:
                 enhancer = ImageEnhance.Brightness(character_art)
                 character_art = enhancer.enhance(darken_factor)
@@ -172,8 +224,15 @@ class Window(PyQt5.QtWidgets.QMainWindow):
             self.burst_art[i].setPixmap(burst_art)
 
     def update_current_character(self, current_character: int) -> None:
+        darken_factor = 0.5
         self.current_character = current_character
-        self.update_party()
+
+        for i in range(0, 4):
+            character_art = self.party.get(i + 1).get_multiwish_art()
+            if not i + 1 == self.current_character:
+                enhancer = ImageEnhance.Brightness(character_art)
+                character_art = enhancer.enhance(darken_factor)
+            self.multiwish_art[i].setPixmap(ImageQt.toqpixmap(character_art))
     
     def update_health(self, current_hp: int, max_hp: int) -> None:
         text = str(current_hp) + " / " + str(max_hp)
@@ -188,15 +247,28 @@ class Window(PyQt5.QtWidgets.QMainWindow):
 
         field = self.skill_cooldown[self.current_character - 1]
         cooldown = Timer(field, cooldown)
-        if not self.cd_threads.get(self.current_character) is None:
-            self.cd_threads.get(self.current_character).requestInterruption()
+        if not self.skill_cd_threads.get(self.current_character) is None:
+            self.skill_cd_threads.get(self.current_character).requestInterruption()
 
-        self.cd_threads[self.current_character] = cooldown
-        self.cd_threads.get(self.current_character).start()
+        self.skill_cd_threads[self.current_character] = cooldown
+        self.skill_cd_threads.get(self.current_character).start()
+
+    def update_burst_cd(self, cooldown: float) -> None:
+        if self.current_character == 0:
+            logging.info("Current character is not known.")
+            return
+
+        field = self.burst_cooldown[self.current_character - 1]
+        cooldown = Timer(field, cooldown)
+        if not self.burst_cd_threads.get(self.current_character) is None:
+            self.burst_cd_threads.get(self.current_character).requestInterruption()
+
+        self.burst_cd_threads[self.current_character] = cooldown
+        self.burst_cd_threads.get(self.current_character).start()
 
 if __name__ == "__main__":
-    """ if not functions.is_admin():
-        functions.launch_as_admin() """
+    if not functions.is_admin():
+        functions.launch_as_admin()
     app = PyQt5.QtWidgets.QApplication(sys.argv)
     MainWindow = Window()
     MainWindow.show()

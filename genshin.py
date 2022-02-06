@@ -50,18 +50,26 @@ class Character:
         # self.physical_dmg_bonus = None
         # self.physical_res = None
 
-    def get_gacha_card_image(self) -> PIL.Image:
-        return PIL.Image.open(functions.script_path + "/img/Multi-Wish arts/" + self.name + ".png")
+    def get_multiwish_art(self) -> PIL.Image:
+        try:
+            return PIL.Image.open(functions.script_path + "/img/Multi-Wish arts/" + self.name + ".png")
+        except FileNotFoundError:
+            return PIL.Image.new('RGB', (320, 1024))
     
     def get_skill_icon(self) -> PIL.Image:
         filename = self.skill.replace(":", "")
-        return PIL.Image.open(functions.script_path + "/img/Talent icons/" + filename + ".png")
+        try:
+            return PIL.Image.open(functions.script_path + "/img/Talent icons/" + filename + ".png")
+        except FileNotFoundError: 
+            return PIL.Image.new('RGB', (128, 128))
 
     def get_burst_icon(self) -> PIL.Image:
         filename = self.burst.replace(":", "")
-        return PIL.Image.open(functions.script_path + "/img/Talent icons/" + filename + ".png")
+        try:
+            return PIL.Image.open(functions.script_path + "/img/Talent icons/" + filename + ".png")
+        except FileNotFoundError: 
+            return PIL.Image.new('RGB', (128, 128))
 
-    
     def set_page1_stats(self, stats_list: list):
         self.max_hp = [stats_list[0], stats_list[1]]
         self.atk = [stats_list[2], stats_list[3]]
